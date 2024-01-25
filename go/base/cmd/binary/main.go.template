@@ -1,0 +1,10 @@
+package main
+
+import (
+	api "{{{ .GoModule }}}/internal/{{{ toDir .ProjectName }}}"
+)
+
+func main() {
+
+	api.NewAPIService().Start()
+}

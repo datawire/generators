@@ -1,0 +1,92 @@
+metadata:
+  name: "Ambassador Labs Go Generator"
+  version: "1.0.0"
+  languages: ["go"]
+
+# Defines the base directory within the template folder.
+# The entire contents of the base directory will be copied 
+# and used to create the root of the new project. It may contain
+# directories, static files that will not be edited, and template files
+# that will be built later.
+baseDirectory: base
+
+# Delimiters define the characters that surround a template variable that needs to be built
+# These will only be evaluated when they are in .template files
+leftDelimiter: "{{{"
+rightDelimiter: "}}}"
+
+
+# Any files ending in this extension will be considered for template building
+templateExtension: ".template"
+
+# TODO: not implemented yet
+# denylist: any template file listed below (ex: "base/example.template") will not be built
+# allowlist:
+ignoredTemplateFiles: 
+  mode: denylist
+  paths: []
+
+# TODO: not implemented yet
+# By default template files will be removed after being built, but any template files listed below will
+# not be deleted after being built
+persistedTemplateFiles: [] 
+
+
+# Example in-line
+# Log: 
+#   source: in-line
+#   value: fmt.Printf("foo bar\n")
+
+# Example in-line template
+# Log: 
+#   source: in-line
+#   value: fmt.Printf("{{ MyMessage }}\n")
+
+# Example static file
+# MultiLine:
+#   source: file
+#   value: templates/myfile.go
+
+# Example from template
+# VersionCheck:
+#   source: file
+#   value: templates/myfile.template
+
+# Example prompt
+# GoModName:
+#   source: prompt
+
+# TODO: Should we add support for validators?
+# TODO: Add a description field
+variables:
+- name: ProjectName
+  sourceType: prompt
+- name: GoModule
+  sourceType: prompt
+- name: GoVersion
+  sourceType: prompt 
+
+renames:
+- path: "base/cmd/binary"
+  value: "{{{ toDir .ProjectName }}}"
+- path: "base/internal/binary"
+  value: "{{{ toDir .ProjectName }}}"
+
+# TODO: Add support for conditions for auto loading modules?
+# TODO: Add a description field
+modules:
+- name: "GitHub Actions - Test"
+  sourceDir: modules/gha-test
+  targetDir: base/.github
+  requiredModules: []  # TODO: not implemented yet
+- name: Readme
+  sourceDir: modules/readme
+  targetDir: base
+  requiredModules: []
+
+# TODO: add support for additional helper funcs
+# toLower
+# toUpper
+# toSentence
+# toCamel
+# moduleEnabled

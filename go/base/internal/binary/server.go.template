@@ -1,0 +1,85 @@
+package api
+
+import (
+	"context"
+	"log"
+	"net/http"
+
+	"golang.org/x/sync/errgroup"
+	ctrl "sigs.k8s.io/controller-runtime"
+)
+
+type apiService struct {
+	addr string
+	// TODO: optional k8s health checks
+}
+
+func NewAPIService() *apiService {
+	return &apiService{
+		addr: ":8080",
+	}
+}
+
+func (s *apiService) WithAddr(addr string) *apiService {
+	s.addr = addr
+	return s
+}
+
+// Starts the main loop for the server which manages and spins up one or more sub servers that listen for requests
+func (s *apiService) Start() {
+	log.Println("{{{ .ProjectName }}} server is starting up")
+	ctx := ctrl.SetupSignalHandler()
+	g, gCtx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return s.Serve(gCtx)
+	})
+
+	// Block here until shutdown signal
+	err := g.Wait()
+	if err != nil {
+		log.Printf("error occured starting {{{ .ProjectName }}} server: %s\n", err.Error())
+	}
+	log.Println("{{{ .ProjectName }}} server shutting down...")
+}
+
+// Starts the sub server for the api endpoints
+func (s *apiService) Serve(ctx context.Context) error {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", handle404)
+	mux.HandleFunc("/about", handleAbout)
+
+	loggedMux := logMiddleware(mux)
+
+	server := &http.Server{
+		Addr:    s.addr,
+		Handler: loggedMux,
+	}
+
+	errChan := make(chan error)
+	go func() {
+		log.Printf("starting {{{ .ProjectName }}} server, address: %s\n", s.addr)
+		errChan <- server.ListenAndServe()
+	}()
+
+	// wait for shut down or error to occur
+	select {
+	case <-ctx.Done():
+		log.Println("{{{ .ProjectName }}} server graceful shutdown started")
+		server.Shutdown(ctx)
+		log.Println("{{{ .ProjectName }}} server successfully shutdown")
+		return nil
+	case err := <-errChan:
+		log.Printf("{{{ .ProjectName }}} server shutdown with error: %s\n", err.Error())
+		return err
+	}
+}
+
+// Lightweight middleware for logging basic info about each request
+func logMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s\n", r.Method, r.URL.Path) // TODO: log status code
+		next.ServeHTTP(w, r)
+	})
+}
