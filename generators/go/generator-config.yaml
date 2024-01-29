@@ -1,10 +1,11 @@
 metadata:
   name: "Ambassador Labs Go Generator"
+  description: "Generates a new project for an API server writen in go"
   version: "1.0.0"
   languages: ["go"]
 
 # Defines the base directory within the template folder.
-# The entire contents of the base directory will be copied 
+# The entire contents of the base directory will be copied
 # and used to create the root of the new project. It may contain
 # directories, static files that will not be edited, and template files
 # that will be built later.
@@ -22,23 +23,23 @@ templateExtension: ".template"
 # TODO: not implemented yet
 # denylist: any template file listed below (ex: "base/example.template") will not be built
 # allowlist:
-ignoredTemplateFiles: 
+ignoredTemplateFiles:
   mode: denylist
   paths: []
 
 # TODO: not implemented yet
 # By default template files will be removed after being built, but any template files listed below will
 # not be deleted after being built
-persistedTemplateFiles: [] 
+persistedTemplateFiles: []
 
 
 # Example in-line
-# Log: 
+# Log:
 #   source: in-line
 #   value: fmt.Printf("foo bar\n")
 
 # Example in-line template
-# Log: 
+# Log:
 #   source: in-line
 #   value: fmt.Printf("{{ MyMessage }}\n")
 
@@ -64,7 +65,7 @@ variables:
 - name: GoModule
   sourceType: prompt
 - name: GoVersion
-  sourceType: prompt 
+  sourceType: prompt
 
 renames:
 - path: "base/cmd/binary"

@@ -1,0 +1,37 @@
+name: Generators
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  generate:
+    name: Generate
+    runs-on: ubuntu-latest
+    env:
+      GH_API_KEY: ${{ secrets.GH_API_KEY }}
+    steps:
+      - name: Checkout local
+        uses: actions/checkout@v3
+
+      - name: Setup Git Config
+        shell: bash
+        run: |
+          set -x
+          git config --global user.email '${{ secrets.GH_AUTO_EMAIL }}'
+          git config --global user.name '${{ secrets.GH_AUTO_USER }}'
+          git config --global url.https://${GH_API_KEY}@github.com/.insteadOf https://github.com/
+
+      # Generate and then make sure no changes have occurred
+      - name: Generate
+        run: |
+          make generate-metadata
+
+      - name: Check porcelain
+        run: |
+          git add .
+          if [[ -n "$(git status --porcelain)" ]]; then
+              PAGER= git diff --cached
+              exit 1
+          fi
