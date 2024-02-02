@@ -16,6 +16,12 @@ baseDirectory: base
 leftDelimiter: "{{{"
 rightDelimiter: "}}}"
 
+externalCommands:
+  requiredTools:
+  - name: "go"
+    downloadUrl: "https://go.dev/doc/install"
+  postHooks:
+  - command: "go mod tidy"
 
 # Any files ending in this extension will be considered for template building
 templateExtension: ".template"
