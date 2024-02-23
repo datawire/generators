@@ -11,6 +11,11 @@ metadata:
 # that will be built later.
 baseDirectory: base
 
+codeGeneration:
+  codeGenLanguage: "go"
+  outputDirectory: "base/internal/api"
+  indentStyle: "tab"
+
 # Delimiters define the characters that surround a template variable that needs to be built
 # These will only be evaluated when they are in .template files
 leftDelimiter: "{{{"
