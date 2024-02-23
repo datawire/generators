@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+  "github.com/gorilla/mux"
 	"golang.org/x/sync/errgroup"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -45,12 +46,14 @@ func (s *apiService) Start() {
 
 // Starts the sub server for the api endpoints
 func (s *apiService) Serve(ctx context.Context) error {
-	mux := http.NewServeMux()
+	router := mux.NewRouter().StrictSlash(true)
 
-	mux.HandleFunc("/", handle404)
-	mux.HandleFunc("/about", handleAbout)
+	router.HandleFunc("/", handle404)
+	router.HandleFunc("/about", handleAbout)
 
-	loggedMux := logMiddleware(mux)
+  {{{ codeGenGorillaMux "router" }}}
+
+	loggedMux := logMiddleware(router)
 
 	server := &http.Server{
 		Addr:    s.addr,
@@ -74,12 +77,4 @@ func (s *apiService) Serve(ctx context.Context) error {
 		log.Printf("{{{ .ProjectName }}} server shutdown with error: %s\n", err.Error())
 		return err
 	}
-}
-
-// Lightweight middleware for logging basic info about each request
-func logMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%s %s\n", r.Method, r.URL.Path) // TODO: log status code
-		next.ServeHTTP(w, r)
-	})
 }
