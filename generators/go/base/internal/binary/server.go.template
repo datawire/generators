@@ -2,23 +2,35 @@ package api
 
 import (
 	"context"
-	"log"
 	"net/http"
+	"os"
+	"time"
 
-  "github.com/gorilla/mux"
+	"github.com/gorilla/mux"
+	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+
 type apiService struct {
+	logger zerolog.Logger
 	addr string
 	// TODO: optional k8s health checks
 }
 
 func NewAPIService() *apiService {
+	output := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
+	logger := zerolog.New(output).With().Timestamp().Logger()
 	return &apiService{
-		addr: ":8080",
+		addr:   ":8080",
+		logger: logger,
 	}
+}
+
+func (s *apiService) WithLogger(logger zerolog.Logger) *apiService {
+	s.logger = logger
+	return s
 }
 
 func (s *apiService) WithAddr(addr string) *apiService {
@@ -28,7 +40,7 @@ func (s *apiService) WithAddr(addr string) *apiService {
 
 // Starts the main loop for the server which manages and spins up one or more sub servers that listen for requests
 func (s *apiService) Start() {
-	log.Println("{{{ .ProjectName }}} server is starting up")
+	s.logger.Info().Msg("{{{ .ProjectName }}} server is starting up")
 	ctx := ctrl.SetupSignalHandler()
 	g, gCtx := errgroup.WithContext(ctx)
 
@@ -39,21 +51,21 @@ func (s *apiService) Start() {
 	// Block here until shutdown signal
 	err := g.Wait()
 	if err != nil {
-		log.Printf("error occured starting {{{ .ProjectName }}} server: %s\n", err.Error())
+		s.logger.Info().Msgf("error occured starting {{{ .ProjectName }}} server: %s", err.Error())
 	}
-	log.Println("{{{ .ProjectName }}} server shutting down...")
+	s.logger.Info().Msg("{{{ .ProjectName }}} server shutting down...")
 }
 
 // Starts the sub server for the api endpoints
 func (s *apiService) Serve(ctx context.Context) error {
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/", handle404)
-	router.HandleFunc("/about", handleAbout)
+	router.HandleFunc("/", s.handle404)
+	router.HandleFunc("/about", s.handleAbout)
 
   {{{ codeGenGorillaMux "router" }}}
 
-	loggedMux := logMiddleware(router)
+	loggedMux := s.logMiddleware(router)
 
 	server := &http.Server{
 		Addr:    s.addr,
@@ -62,19 +74,19 @@ func (s *apiService) Serve(ctx context.Context) error {
 
 	errChan := make(chan error)
 	go func() {
-		log.Printf("starting {{{ .ProjectName }}} server, address: %s\n", s.addr)
+		s.logger.Info().Msgf("starting {{{ .ProjectName }}} server, address: %s", s.addr)
 		errChan <- server.ListenAndServe()
 	}()
 
 	// wait for shut down or error to occur
 	select {
 	case <-ctx.Done():
-		log.Println("{{{ .ProjectName }}} server graceful shutdown started")
+		s.logger.Info().Msg("{{{ .ProjectName }}} server graceful shutdown started")
 		server.Shutdown(ctx)
-		log.Println("{{{ .ProjectName }}} server successfully shutdown")
+		s.logger.Info().Msg("{{{ .ProjectName }}} server successfully shutdown")
 		return nil
 	case err := <-errChan:
-		log.Printf("{{{ .ProjectName }}} server shutdown with error: %s\n", err.Error())
+		s.logger.Info().Msgf("{{{ .ProjectName }}} server shutdown with error: %s", err.Error())
 		return err
 	}
 }
