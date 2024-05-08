@@ -3,7 +3,7 @@
     {
       "name": "Ambassador Labs Go Generator",
       "description": "Generates a new project for an API server writen in go",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "languages": ["go"],
       "dir_name": "go"
     }]

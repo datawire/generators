@@ -6,6 +6,10 @@ import (
 	"os"
 	"time"
 
+  {{{- if _isCodegenEnabled }}}
+  api "{{{ .GoModule }}}/internal/api"
+  {{{ end -}}}
+
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"golang.org/x/sync/errgroup"
@@ -63,7 +67,9 @@ func (s *apiService) Serve(ctx context.Context) error {
 	router.HandleFunc("/", s.handle404)
 	router.HandleFunc("/about", s.handleAbout)
 
-  {{{ codeGenGorillaMux "router" }}}
+  {{{- if _isCodegenEnabled }}}
+  {{{ _codegenGoAddRoutesToGorillaRouter "router" }}}
+  {{{ end -}}}
 
 	loggedMux := s.logMiddleware(router)
 
