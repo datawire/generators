@@ -1,7 +1,7 @@
 metadata:
   name: "Ambassador Labs Go Generator"
   description: "Generates a new project for an API server writen in go"
-  version: "0.0.2"
+  version: "0.0.3"
   languages: ["go"]
 
 # Defines the base directory within the template folder.
@@ -80,9 +80,9 @@ variables:
 
 renames:
 - path: "base/cmd/binary"
-  value: "{{{ toDir .ProjectName }}}"
+  value: "{{{ _toDir .ProjectName }}}"
 - path: "base/internal/binary"
-  value: "{{{ toDir .ProjectName }}}"
+  value: "{{{ _toDir .ProjectName }}}"
 
 # TODO: Add support for conditions for auto loading modules?
 # TODO: Add a description field
