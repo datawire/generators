@@ -27,7 +27,7 @@ func NewAPIService() *apiService {
 	output := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
 	logger := zerolog.New(output).With().Timestamp().Logger()
 	return &apiService{
-		addr:   ":8080",
+		addr:   ":80",
 		logger: logger,
 	}
 }
