@@ -12,18 +12,18 @@ COPY internal internal
 
 FROM base AS builder
 
-WORKDIR cmd/{{{ .ProjectName }}}
-RUN go build -o /build/{{{ .ProjectName }}} .
+WORKDIR cmd/{{{ _toDir .ProjectName }}}
+RUN go build -o /build/{{{ _toDir .ProjectName }}} .
 
 FROM base AS debug
-WORKDIR cmd/{{{ .ProjectName }}}
-RUN go build -gcflags="all=-N -l" -o /build/{{{ .ProjectName }}} .
+WORKDIR cmd/{{{ _toDir .ProjectName }}}
+RUN go build -gcflags="all=-N -l" -o /build/{{{ _toDir .ProjectName }}} .
 
 ENV DEBUG_PORT=2345
 EXPOSE $DEBUG_PORT
-ENTRYPOINT /go/bin/dlv --listen=:$DEBUG_PORT --headless=true --api-version=2 --accept-multiclient exec /build/{{{ .ProjectName }}}
+ENTRYPOINT /go/bin/dlv --listen=:$DEBUG_PORT --headless=true --api-version=2 --accept-multiclient exec /build/{{{ _toDir .ProjectName }}}
 
 FROM alpine AS run
-COPY --from=builder /build/{{{ .ProjectName }}} /
-CMD ["/{{{ .ProjectName }}}"]
+COPY --from=builder /build/{{{ _toDir .ProjectName }}} /
+CMD ["/{{{ _toDir .ProjectName }}}"]
 
