@@ -1,7 +1,7 @@
 metadata:
   name: "Ambassador Labs Go Generator"
   description: "Generates a new project for an API server written in go"
-  version: "0.0.4"
+  version: "0.0.5"
   languages: ["go"]
 
 # Defines the base directory within the template folder.
