@@ -96,7 +96,7 @@ modules:
   targetDir: base
   requiredModules: []
 - name: Dockerfile
-  sourceDir: modules/Dockerfile
+  sourceDir: modules/dockerfile
   targetDir: base
   requiredModules: []
 
