@@ -25,5 +25,6 @@ ENTRYPOINT /go/bin/dlv --listen=:$DEBUG_PORT --headless=true --api-version=2 --a
 
 FROM alpine AS run
 COPY --from=builder /build/{{{ _toDir .ProjectName }}} /
+USER 1000
 CMD ["/{{{ _toDir .ProjectName }}}"]
 
